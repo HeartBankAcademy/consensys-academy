@@ -24,6 +24,9 @@ Rationale: prevent logic bugs and avoid attacks designed around weak state manag
 Dynamic arrays for confirmed swaps, collections, proposed swaps all use the container data structure pattern based on the CRUD doc 
 https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
 
+## Emergency Stop or Circuit Breaker pattern
+Implemented so that only contract owner can stop contract and only payable functions are protected
+
 ## Use Mappings where possible and avoid For Loops
 To avoid DOS attacks and gas costs prefer Mappings over arrays for collection where iteration of collection is not required
 

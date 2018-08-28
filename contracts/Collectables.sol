@@ -75,6 +75,18 @@ contract Collectables is Ownable {
     mapping (uint => address[2]) swapOwners;  // swappee=0, swapper=1
     mapping (uint => SwapTracker[2]) swapTracker; // TODO consider combining swapOwners
 
+    bool public stopped = false; // emergency stop or circuit breaker
+
+    modifier stopInEmergency {
+        require(!stopped, "Contract Emergency Stop provisions have been activated"); 
+        _;
+    }
+    
+    modifier onlyInEmergency {
+        require(stopped, "Contract Emergency Stop provisions have been activated to allow you to withdraw funds"); 
+        _;
+    }
+
     modifier onlyCollector() {
         require(isCollector(msg.sender), "Must register to perform this operation");
         _;
@@ -84,6 +96,11 @@ contract Collectables is Ownable {
         require(categoryCollectionsMap[category][index].collector == msg.sender, "must own collection");
         _;
     } 
+
+    // Allows contract owner to stop contract if major bug found
+    function stopContract() external onlyOwner {
+        stopped = true;
+    }
 
     /**
     * @dev Allows the current owner to add a Category
@@ -252,7 +269,7 @@ contract Collectables is Ownable {
     */
     function addProposedSwap(
         string _category, uint[2] _index, address _swappee, bytes32 _ipfsSwapAddr, string _itemNameFor, string _itemNameWith) 
-        external payable onlyCollectionOwner(_category, _index[0]) {
+        external payable stopInEmergency onlyCollectionOwner(_category, _index[0]) {
    
         require(bytes(collectors[_swappee].name).length > 0, "Invalid address");
         require(bytes(_itemNameFor).length > 0, "Must supply item name for swap");
@@ -352,7 +369,7 @@ contract Collectables is Ownable {
     * @param _ipfsPostal hash of postal address to send proposed swap item to
      */ 
     function confirmSwap(string _category, uint _index, uint _psidx, bytes32 _ipfsPostal)
-        external payable onlyCollectionOwner(_category, _index) {
+        external payable stopInEmergency onlyCollectionOwner(_category, _index) {
         require(_psidx >= 0 && _psidx < collectors[msg.sender].proposedSwaps.length, "Invalid swap index");
         require(msg.value == collectors[msg.sender].proposedSwaps[_psidx].swapFor.value, "Must only send ether that matches value of swap item");
         require(_ipfsPostal.length == 32, "_ipfsPostal length (without hashtype and length prefix) must be 32 bytes long");
