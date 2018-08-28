@@ -1,5 +1,19 @@
 # Consensys Academy 2018 Final Project of Simon Abela
 ## Collectables dApp - for cataloging and swapping
+
+### Current State
+#### Angular 6 frontend
+Very early alpha 
+Only implemented User browses Categories story (and only categories and collections so far)
+- not working (need to implement temp setup function to boostrap constract storage)
+
+#### Solidity backend
+First beta version - all functionality implemented for user stories apart from disputes
+- tests working, doxygen tags done, design decisions documented, avoiding attacks documented 
+
+#### IPFS
+No files added or server running yet
+
 ### User Stories
 #### Admin (Contract Owner) creates Category
 
@@ -32,8 +46,8 @@ As for *add item* story except collector clicks *Remove Item* and item is remove
 
 #### User browses Categories
 From home page click on *Browse All Callections*
-User (can also be collector) is presented with list of Categories
-User clicks on Category
+User (can also be collector) is presented with list of Categories in Tree format
+User clicks on Category expander
 User is presented with list of collections for that category
 User clicks on Collection
 User is presented with list of items in that Collection
@@ -81,7 +95,10 @@ When both Collectors have clicked on *Received* then the Swap is considered *Com
 Any funds claimable shall be viewable from home page
 Collector can then claim escrow from the home page link and a transaction initiated from contract to claimant
 
-#### Disputes
+### Withdraw redeemable funds
+Collector can withdraw redeemable escrow by calling takeRedeemableEscrow function. dApp to provide interface as well.
+
+#### Disputes (not yet implemented)
 Either party can initiate a dispute from the Confirmed swaps list upon the following conditions
 - they have entered a tracking number or the other party has marked the item as received
 - they have still not received their item(s) and 
@@ -100,14 +117,29 @@ checkout from github
 
 ### To Run
 ng serve 
+(please note node_modules are not checked in so run *ng update* first)
 
 The app is now served on localhost:4200 (if you have metamask running it will interact with that else use ganache-cli)
+####Versions
+Versions i have tested with
+Angular CLI: 6.1.2
+Node: 8.11.3
+Angular: 6.1.1
+
 ### To Test
 start up ganache-cli from another terminal in project dir
 in same project dir run
 truffle compile
 truffle migrate
 truffle test
+
+If all ok should get 15 successful tests
+
+#### Versions
+Versions i have tested with
+Ganache CLI: v6.1.3 (ganache-core: 2.1.2)
+Truffle: v4.1.12 (core: 4.1.12)
+Solidity: v0.4.24 (solc-js)
 
 
 

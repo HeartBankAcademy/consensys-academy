@@ -10,11 +10,9 @@ contract Collectables is Ownable {
     struct Collection {
         address collector;
         string name;
-        string tags;
-        //bool exists;
+        string tags; // for dApp to use for searching (contract does not implement tag searching)
         uint8 itemCount;  // TODO enforce limit 255
         mapping (uint => Item) items;  // item key is index (makes map look like an array)
-        //bytes32[] itemNames; // used for items key
         mapping (string => uint) itemNames; // maps names to index in items (used for uniqueness checking)
     }
 
@@ -28,13 +26,12 @@ contract Collectables is Ownable {
     }
 
     // store collections by Category
-    // for efficiency Category name limit will be 32 characters
-    //bytes32[] public categories;
     string[] public categories;
     mapping (string => Collection[]) categoryCollectionsMap; // cant make public with string as key
-    // to get list of category names get number of categories then call getter per index
-    // to get list of collections per category get number of collections and then call getter // ccm[catName][i].name
-    // to get my collection for category use MyCollections list for index into collections list (per category)
+    /* to get list of category names get number of categories then call getter per index
+     * to get list of collections per category get number of collections and then call getter // ccm[catName][i].name
+     * to get my collection for category use MyCollections list for index into collections list (per category)
+     */
 
     // a collector may have many collections but only 1 in each category (for now)
     struct Collector {
@@ -76,7 +73,7 @@ contract Collectables is Ownable {
 
     ConfirmedSwap[] confirmedSwaps;
     mapping (uint => address[2]) swapOwners;  // swappee=0, swapper=1
-    mapping (uint => SwapTracker[2]) swapTracker; // TODO if this works try combining in swapOwners
+    mapping (uint => SwapTracker[2]) swapTracker; // TODO consider combining swapOwners
 
     modifier onlyCollector() {
         require(isCollector(msg.sender), "Must register to perform this operation");
@@ -98,13 +95,18 @@ contract Collectables is Ownable {
     }
 
     /**
-    * @dev get array limit and then call getter num times to fetch all categories
+    * @dev Allow caller to get array limit and then call getter num times to fetch all categories
+    * @return num number of items in category array 
     */
     function getNumberOfCategories() external view returns (uint num) {
         return categories.length;
     }
  
     // can be called internally and externally hence public
+    /**
+    * @dev Allow caller to determine if given address is registered as a Collector
+    * @return isIndeed True if registered
+    */
     function isCollector(address addr) public view returns (bool isIndeed) {
         if(bytes(collectors[addr].name).length == 0) return false;
         return true;
@@ -120,6 +122,10 @@ contract Collectables is Ownable {
         collectors[msg.sender].name = _name;
     }
 
+   /**
+    * @dev Allow Collector to query how much redeemable escrow (funds) they have
+    * @return uint Amount in wei
+    */
     function getRedeemableEscrow() external view onlyCollector returns (uint) {
         return collectors[msg.sender].redeemableEscrow;
     }
@@ -135,7 +141,6 @@ contract Collectables is Ownable {
         require(bytes(_tags).length > 0, "Tags argument must be populated");
         require(bytes(_category).length > 0, "Category argument must be populated");
         // push returns new length
-        //bytes32[] memory itemNames;
         Collection memory collection = Collection(msg.sender, _name, _tags, 0);
         collectors[msg.sender].myCollections[_category] = categoryCollectionsMap[_category].push(collection)-1;
     }
@@ -143,19 +148,28 @@ contract Collectables is Ownable {
    /**
     * @dev Allows the caller to get the number of collections for a category
     * @param _category category name
+    * @return num Number of items in collection array for given category
     */
     function getNumberOfCollectionsForCategory(string _category) external view returns (uint num) {
         return categoryCollectionsMap[_category].length;
     }
 
+    /**
+    * @dev Allows a collector to get the total number of confirmed swaps
+    * @return num number of confirmed swaps
+    */
     function getNumberOfConfirmedSwaps() external view onlyCollector returns (uint num) {
         return confirmedSwaps.length;
     }
     
     /**
-    * @dev Allows the caller to get collection details: collection name, address of owner, and tags
+    * @dev Allows the caller to get collection details
     * @param _category category name
     * @param _index index of collection
+    * @return name (collection name)
+    * @return owner (address of owner)
+    * @return tags (for dApp to use for searching)
+    * @return count (number of items in collection)
     */
     function getCollectionDetailsByIndex(string _category, uint _index)
         external view returns (string name, address owner, string tags, uint8 count) {
@@ -169,8 +183,6 @@ contract Collectables is Ownable {
     * @param _category category name
     * @param _index index of collection
     */
-    // add item to collection, called externally only
-    // to store ipfshash properly refer https://github.com/saurfang/ipfs-multihash-on-solidity
     function addItem(string _category, uint _index, string _name, bytes32 _ipfsHash, uint _value, bool _swappable) 
         external onlyCollectionOwner(_category, _index) {
     
@@ -205,8 +217,7 @@ contract Collectables is Ownable {
             categoryCollectionsMap[_category][_index].items[itemIndex].exists,
             "Item name must be in collection"
         );
-        // first delete from map but get name index first
-        //uint indexToRemove = categoryCollectionsMap[category][index].items[name].index;
+        // delete from items map
         delete categoryCollectionsMap[_category][_index].items[itemIndex];
         // now delete from item names map
         delete categoryCollectionsMap[_category][_index].itemNames[_name];
@@ -215,10 +226,13 @@ contract Collectables is Ownable {
     }
 
    /**
-    * @dev Allows the caller to get the details for an Item from collection: ipfsHash, item value, swappable flag
+    * @dev Allows the caller to get the details for an Item from collection
     * @param _category category name
     * @param _index index of collection
     * @param _name item name
+    * @return ipfsHash (hash of item image)
+    * @return value (item value)
+    * @return swappable (bool flag to indicate if item is available for swapping)
     */    
     function getItem(string _category, uint _index, string _name) external view returns (bytes32 ipfsHash, uint value, bool swappable) {
         require(_index >= 0 && _index < categoryCollectionsMap[_category].length, "Index out of range"); // 0 < 0 handles bad category name
@@ -227,18 +241,6 @@ contract Collectables is Ownable {
         return (item.ipfsHash, item.value, item.swappable); 
     }
 
-    /*  TODO do we really need this function
-    function getItemNames(string _category, uint _index) external view returns (string[] names) {
-        require(_index >= 0 && _index < categoryCollectionsMap[_category].length, "Index out of range");
-        return categoryCollectionsMap[_category][_index].itemNames;
-    }*/
-
-   /* Design Decision: Postal Address was stored in ipfs to avoid storage, gas and stack issues and use strength of js for address validation and allow dApp
-    * to use public key of other party to encrypt address then store it in ipfs and pass here 
-    * also leave it to dApp to get swappable items for msg.sender up to given value (contract will validate if proposed swap is swappable) 
-    * (get all items in msg.sender collection for that category) and then filter out non swappable
-    * also pass index args as 1 fix sized array to avoid stack issue
-    */
     /**
     * @dev Allows the Collector to add a Proposed Swap request, this function is payable pass value of item swapping with
     * @param _category category name
@@ -258,17 +260,11 @@ contract Collectables is Ownable {
         require(_index[1] < categoryCollectionsMap[_category].length, "Invalid index for Collection to get swap from");
         require(_ipfsSwapAddr.length == 32, "ipfsSwapAddr length (without hashtype and length prefix) must be 32 bytes long");
 
-        /*uint itemIndex = categoryCollectionsMap[_category][_collIndexFrom].itemNames[_itemNameFor];
-        Item memory swapFor = categoryCollectionsMap[_category][_collIndexFrom].items[itemIndex];
-        */
         Item memory swapFor = _findSwap(_category, _itemNameFor, _index[1]);
         require(swapFor.ipfsHash.length > 0, "Cannot find item to swap for");
         require(swapFor.swappable, "Collection owner doesn't want to swap this item");
         require(msg.value == swapFor.value, "Only send in ether that equals value of item swapped for");
 
-        /*itemIndex = categoryCollectionsMap[_category][_index].itemNames[_itemNameWith];
-        Item memory swapWith = categoryCollectionsMap[_category][_index].items[itemIndex];
-        */
         Item memory swapWith = _findSwap(_category, _itemNameWith, _index[0]);
         require(swapWith.ipfsHash.length > 0, "Cannot find item to swap with");
         require(!collectors[msg.sender].sentProposals[swapWith.ipfsHash], "Cannot propose swap for item that already has been proposed");
@@ -286,12 +282,15 @@ contract Collectables is Ownable {
     }
     
     /**
-    * @dev Allows the Collection Owner of proposed swap requested item to get the details of a Proposed Swap: swapper addr, swapper postal address, 
-    *      hash of item to swap for,
-    *      hash of item to swap with, value of item to swap with
+    * @dev Allows the Collection Owner of proposed swap requested item to get the details of a Proposed Swap  
     * @param _category category name
     * @param _index index of collection (of caller)
     * @param _swapIndex index of proposal swap array
+    * @return swapper (Swapper ether addr)
+    * @return swapperAddr (IPFS hash of Swapper postal address)
+    * @return ipfsHashFor (IPFS Hash of item to swap for)
+    * @return ipfsHashWith (IPFS Hash of item to swap with)
+    * @return valueWith (Value of item to swap with)
     */ 
     function getProposedSwap(string _category, uint _index, uint _swapIndex) 
         external view onlyCollectionOwner(_category, _index) 
@@ -307,6 +306,7 @@ contract Collectables is Ownable {
     * @param _category category name
     * @param _index index of collection (of caller)
     * @param _ipfsItem ipfs hash of item to swap with
+    * @return bool Flag indicating is proposal sent
     */ 
     function isProposalSent(string _category, uint _index, bytes32 _ipfsItem) external view onlyCollectionOwner(_category, _index) 
         returns (bool) {
@@ -331,7 +331,7 @@ contract Collectables is Ownable {
     }
 
     /*
-     * Efficient function to delete a proposed swap
+     * Efficient private function to delete a proposed swap
      * rather than use delete which keeps the same length and initialises deleted element struct to empty vals, 
      * simply move the last item in array to the item to remove element and reduce length by 1, saving gas
      * works since we dont care abaout array order
@@ -425,6 +425,13 @@ contract Collectables is Ownable {
     * @param _category name of category
     * @param _index index of callers collection, will be validated that caller owns collection
     * @param _csidx index of confirmed swap array
+    * @return swapper (Swapper ether addr)
+    * @return swapperAddr (IPFS hash of Swapper postal address)
+    * @return ipfsHashFor (IPFS Hash of item to swap for)
+    * @return ipfsHashWith (IPFS Hash of item to swap with)
+    * @return valueWith (Value of item to swap with)
+    * @return swappeeAddr (IPFS hash of swappees postal address)
+    * @return status (status of confirmed swap)
     */
     function getConfirmedSwapDetails(string _category, uint _index, uint _csidx) 
         external view onlyCollectionOwner(_category, _index)
@@ -441,6 +448,7 @@ contract Collectables is Ownable {
     * @param _category name of category
     * @param _index index of callers collection, will be validated that caller owns collection
     * @param _csidx index of confirmed swap array
+    * @return swapper received flag, swapper tracking reference, swappee received flag, swappee tracking reference
     */
     function getConfirmedSwapTrackingDetails(string _category, uint _index, uint _csidx) 
         external view onlyCollectionOwner(_category, _index)
@@ -453,7 +461,6 @@ contract Collectables is Ownable {
         return (track[1].received, track[1].reference, track[0].received, track[0].reference);
     }
 
-    //TODO check safety checklist, common bugs, attacks and best practises
     /**
     * @dev Allows a Collecter to take Redeemable Escrow equal to the value that is redeeemable (contract may take small fee in future for ipfs costs)
     */
