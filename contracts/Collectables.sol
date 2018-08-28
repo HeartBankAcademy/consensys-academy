@@ -27,6 +27,7 @@ contract Collectables is Ownable {
 
     // store collections by Category
     string[] public categories;
+    mapping (string => bool) categoryNameExists;
     mapping (string => Collection[]) categoryCollectionsMap; // cant make public with string as key
     /* to get list of category names get number of categories then call getter per index
      * to get list of collections per category get number of collections and then call getter // ccm[catName][i].name
@@ -81,7 +82,7 @@ contract Collectables is Ownable {
         require(!stopped, "Contract Emergency Stop provisions have been activated"); 
         _;
     }
-    
+
     modifier onlyInEmergency {
         require(stopped, "Contract Emergency Stop provisions have been activated to allow you to withdraw funds"); 
         _;
@@ -108,7 +109,9 @@ contract Collectables is Ownable {
     */
     function addCategory(string _category) external onlyOwner {
         require(bytes(_category).length > 0 && bytes(_category).length < 31, "category must be populated and max len 30");
+        require(!categoryNameExists[_category], "Category Name must be unique");
         categories.push(_category);
+        categoryNameExists[_category] = true;
     }
 
     /**
@@ -156,7 +159,8 @@ contract Collectables is Ownable {
     function addCollection(string _name, string _tags, string _category) external onlyCollector {
         require(bytes(_name).length > 0, "Name argument must be populated");
         require(bytes(_tags).length > 0, "Tags argument must be populated");
-        require(bytes(_category).length > 0, "Category argument must be populated");
+        require(categoryNameExists[_category], "Invalid Category Name");
+
         // push returns new length
         Collection memory collection = Collection(msg.sender, _name, _tags, 0);
         collectors[msg.sender].myCollections[_category] = categoryCollectionsMap[_category].push(collection)-1;

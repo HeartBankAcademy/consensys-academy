@@ -5,12 +5,16 @@
 #### Angular 6 frontend
 Very early alpha 
 Only implemented User browses Categories story (and only categories and collections so far)
-- not working (need to implement temp setup function to boostrap contract storage)
-- app does recognise accounts and add category using owner has been implemented successfully
+- not working (need to get bootstrap function working - cant add collections to category)
+- app does connect to contract and can recognise accounts
+- add category using owner has been implemented successfully and can retrieve category name from contract
+- gets category count from contract successfully
 
 #### Solidity backend
-First beta version - all functionality implemented for user stories apart from disputes
-- tests working, doxygen tags done, design decisions documented, avoiding attacks documented 
+First Candidate beta version - all functionality implemented for user stories apart from disputes
+- all 15 tests working, doxygen tags done, design decisions documented, avoiding attacks documented
+
+LibraryDemo.sol implemented to show how to implement a eth pm package library
 
 #### IPFS
 No files added or server running yet

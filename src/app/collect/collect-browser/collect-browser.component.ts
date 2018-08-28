@@ -1,4 +1,4 @@
-import {Component, Injectable, OnInit} from '@angular/core';
+import {Component, Injectable, OnInit, isDevMode} from '@angular/core';
 import {Web3Service} from '../../util/web3.service';
 //import { MatSnackBar } from '@angular/material';
 import {FlatTreeControl} from '@angular/cdk/tree';
@@ -53,11 +53,14 @@ export class CollectionStorage {
         });
     
       // Build the tree nodes from Ethereum. The result is a list of `CollectionNode` with nested collection node as children.
-      //const data = this.buildFileTree(dataObject, 0);
-      await this.delay(11000); // after accounts are refreshed, will reduce this later
-      // TODO will need a temp bootstrap function to setup category and collections
+      await this.delay(1300); // after accounts are refreshed, will reduce this later
+      if(isDevMode()) {
+        console.log("In dev mode so bootstrapping data into contract");
+        this.bootstrap();
+        await this.delay(500);
+      }
       this.getCategories();
-      //await this.delay(300);
+      await this.delay(300);
       this.getCollections();
 
       // Notify the change.
@@ -74,6 +77,51 @@ export class CollectionStorage {
       });
     }
 
+    // temporary bootstrap function for dev
+    async bootstrap() {
+      const owner = this.accounts[0];
+      const alice = this.accounts[1];
+      const bob = this.accounts[2];
+
+      const collectables = await this.Collectables.deployed();
+      const category = "Coles Little Shop";
+      const tags = "#LittleShop, #Coles";
+
+      try {     
+        await collectables.addCategory(category, {from: owner});
+      } catch (e) {
+        console.log("Probably duplicate category: " + e.message.toString());
+      }   
+
+      try {
+        const name = "Alice";
+        await collectables.addCollector(name, {from: alice});
+      } catch (e) {
+        console.log("Add Collector failed with: " + e.message);
+      }    
+
+      try {
+        const collName = "Little Shop of Alice";
+        await collectables.addCollection(collName, tags, category, {from: alice});
+      } catch (e) {
+        console.log("Add collection for Alice failed with: " + e.message);
+      }  
+
+      try {
+        const bobsName = "Bob";
+        await collectables.addCollector(bobsName, {from: bob});
+      } catch (e) {
+        console.log("Add collector for Bob failed with: " + e.message);
+      } 
+
+      try {
+        const bobsShop = "Little Shop of Bob";
+        await collectables.addCollection(bobsShop, tags, category, {from: bob});
+      } catch (e) {
+        console.log("Add collection for Bob failed with: " + e.message);
+      }      
+    }
+
     async getCategories() {
       if (!this.Collectables) {
         console.log('Collectables is not loaded, unable to send transaction');
@@ -81,11 +129,8 @@ export class CollectionStorage {
       }
       try {
         const collectables = await this.Collectables.deployed();
-        const test = "TEST";
-        await collectables.addCategory(test, {from: this.accounts[0]});
- 
         const categoryCount = await collectables.getNumberOfCategories();
-        console.log(categoryCount.toString(10));
+        console.log("Number of categories: " + categoryCount.toString(10));
 
         for (var i=0; i<categoryCount; i++) {
           const category = await collectables.categories(i);
@@ -107,12 +152,14 @@ export class CollectionStorage {
       }
       try {
         const collectables = await this.Collectables.deployed();
-        //console.log(this);
-        for (var catIndex=0; catIndex<this.CategoryNodes.length; catIndex++) {
+        console.log(this.CategoryNodes.length);
+        for (var catIndex=0; catIndex < this.CategoryNodes.length; catIndex++) {
           const category = this.CategoryNodes[catIndex].name;
+          console.log("category: " + category);
+
           const count = await collectables.getNumberOfCollectionsForCategory(category);
           this.CategoryNodes[catIndex].children = [];
-
+          console.log("Number of Collections: " + count.toString(10));
           for (var i=0; i<count; i++) {
             const collection = await collectables.getCollectionDetailsByIndex(category, i);
 
@@ -121,7 +168,6 @@ export class CollectionStorage {
             node.type = 'Collection';
             this.CategoryNodes[catIndex].children.push(node);
           }
-        
         }
        
       } catch (e) {
