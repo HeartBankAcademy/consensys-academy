@@ -10,6 +10,8 @@ Only implemented User browses Categories story (and only categories and collecti
 - add category using owner has been implemented successfully and can retrieve category name from contract
 - gets category count from contract successfully
 
+Going to switch to geth for further dev and testing (both truffle and dApp)
+
 #### Solidity backend
 First Candidate beta version - all functionality implemented for user stories apart from disputes
 - all 15 tests working, doxygen tags done, design decisions documented, avoiding attacks documented
