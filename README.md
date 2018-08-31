@@ -159,9 +159,9 @@ Do a flow chart
 
 ## Setup
 ### Checkout from github
-    ```
-    git clone https://github.com/sabela/consensys-academy.git collectables
-    ```
+   ```
+   git clone https://github.com/sabela/consensys-academy.git collectables
+   ```
 
 ### Install Angular CLI Globally and node modules (NB dont run npm update)
    ```
@@ -169,16 +169,16 @@ Do a flow chart
    npm install
    ```
 ### Compile and migrate contracts  (assuming using ganache-cli to simulate blockchain)
-    ```
-    truffle compile
-    ganache-cli
-    truffle migrate
-    ```
+   ```
+   truffle compile
+   ganache-cli
+   truffle migrate
+   ```
 
 ### To Run (depends on above steps)
-    ```
-    ng serve 
-    ```
+   ```
+   ng serve 
+   ```
 
 The app is now served on localhost:4200 (if you have metamask running it will interact with that else use ganache-cli)
 
@@ -196,9 +196,9 @@ make sure ganache-cli is running in another terminal
 
 in project dir run (NB running test does compile and migrate)
 
-    ```
-    truffle test
-    ```
+   ```
+   truffle test
+   ```
 
 If all ok should get 15 successful tests
 
