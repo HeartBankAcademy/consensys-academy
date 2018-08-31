@@ -159,24 +159,24 @@ Do a flow chart
 
 ## Setup
 ### Checkout from github
-    ```bash
+    ```
     git clone https://github.com/sabela/consensys-academy.git collectables
     ```
 
 ### Install Angular CLI Globally and node modules (NB dont run npm update)
-   ```bash
+   ```
    npm install -g @angular/cli
    npm install
    ```
 ### Compile and migrate contracts  (assuming using ganache-cli to simulate blockchain)
-    ```bash
+    ```
     truffle compile
     ganache-cli
     truffle migrate
     ```
 
 ### To Run (depends on above steps)
-    ```bash
+    ```
     ng serve 
     ```
 
@@ -195,6 +195,7 @@ Angular: 6.1.1
 make sure ganache-cli is running in another terminal
 
 in project dir run (NB running test does compile and migrate)
+
     ```
     truffle test
     ```
