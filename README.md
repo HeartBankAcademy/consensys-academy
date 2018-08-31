@@ -158,11 +158,27 @@ Otherwise escrow will continue to be held by contract
 Do a flow chart
 
 ## Setup
-checkout from github
+### Checkout from github
+    ```bash
+    git clone https://github.com/sabela/consensys-academy.git collectables
+    ```
 
-### To Run
-ng serve 
-(please note node_modules are not checked in so run *ng update* first)
+### Install Angular CLI Globally and node modules (NB dont run npm update)
+   ```bash
+   npm install -g @angular/cli
+   npm install
+   ```
+### Compile and migrate contracts  (assuming using ganache-cli to simulate blockchain)
+    ```bash
+    truffle compile
+    ganache-cli
+    truffle migrate
+    ```
+
+### To Run (depends on above steps)
+    ```bash
+    ng serve 
+    ```
 
 The app is now served on localhost:4200 (if you have metamask running it will interact with that else use ganache-cli)
 
@@ -176,15 +192,12 @@ Node: 8.11.3
 Angular: 6.1.1
 
 ### To Test
-start up ganache-cli from another terminal in project dir
+make sure ganache-cli is running in another terminal
 
-in same project dir run
-
-truffle compile
-
-truffle migrate
-
-truffle test  (running this does compile and migrate)
+in project dir run (NB running test does compile and migrate)
+    ```
+    truffle test
+    ```
 
 If all ok should get 15 successful tests
 
