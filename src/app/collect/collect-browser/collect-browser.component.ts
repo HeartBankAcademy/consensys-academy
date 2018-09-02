@@ -54,11 +54,11 @@ export class CollectionStorage {
     
       // Build the tree nodes from Ethereum. The result is a list of `CollectionNode` with nested collection node as children.
       await this.delay(1300); // after accounts are refreshed, will reduce this later
-      if(isDevMode()) {
+      /*if(isDevMode()) {
         console.log("In dev mode so bootstrapping data into contract");
         this.bootstrap();
         await this.delay(500);
-      }
+      }*/
       this.getCategories();
       await this.delay(300);
       this.getCollections();
@@ -78,6 +78,7 @@ export class CollectionStorage {
     }
 
     // temporary bootstrap function for dev
+    // TODO come up with a better way to boostrap via script
     async bootstrap() {
       const owner = this.accounts[0];
       const alice = this.accounts[1];
@@ -93,7 +94,7 @@ export class CollectionStorage {
         console.log("Probably duplicate category: " + e.message.toString());
       }   
 
-      try {
+      /*try {
         const name = "Alice";
         await collectables.addCollector(name, {from: alice});
       } catch (e) {
@@ -119,7 +120,7 @@ export class CollectionStorage {
         await collectables.addCollection(bobsShop, tags, category, {from: bob});
       } catch (e) {
         console.log("Add collection for Bob failed with: " + e.message);
-      }      
+      }  */    
     }
 
     async getCategories() {
