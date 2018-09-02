@@ -5,14 +5,15 @@ contract('Collectables', function(accounts) {
     const alice = accounts[1];
     const bob = accounts[2];
     const category = "Coles Little Shop";
+    const newCat = "Beswick Horses";
 
     it("should allow owner to add a category", async() => {
         const collectables = await Collectables.deployed();
-        await collectables.addCategory(category, {from: owner});
+        await collectables.addCategory(newCat, {from: owner});
         const categoryCount = await collectables.getNumberOfCategories();
-        assert.equal(categoryCount, 1, 'Category count should be incremented');
-        const result = await collectables.categories(0);
-        assert.equal(result, category, 'Category name should match');
+        assert.equal(categoryCount, 2, 'Category count should be incremented');
+        const result = await collectables.categories(1);
+        assert.equal(result, newCat, 'Category name should match');
     });
 
     it("should not allow a non owner to add category", async() => {
@@ -25,9 +26,9 @@ contract('Collectables', function(accounts) {
             assert.equal(e.message, expected, 'Extected error message match: ' + expected);          
         }
         const categoryCount = await collectables.getNumberOfCategories();
-        assert.equal(categoryCount, 1, 'Category count should not be incremented');
-        const result = await collectables.categories(0);
-        assert.equal(result, category, 'Category name should be what owner added');       
+        assert.equal(categoryCount, 2, 'Category count should not be incremented');
+        const result = await collectables.categories(1);
+        assert.equal(result, newCat, 'Category name should be what owner added');       
     });
 
     it("should allow a user to register as a Collector", async() => {
@@ -50,9 +51,9 @@ contract('Collectables', function(accounts) {
         //console.log(collector);
 
         const count = await collectables.getNumberOfCollectionsForCategory(category);
-        assert.equal(count, 1, 'Should be 1 collection for category');
+        assert.equal(count, 2, 'Should now be 2 collections for category');
 
-        const collection = await collectables.getCollectionDetailsByIndex(category, 0);
+        const collection = await collectables.getCollectionDetailsByIndex(category, count - 1);
 
         assert.equal(collection[0], name, 'Collection name should match');
         assert.equal(collection[1], alice, 'Collection owner should be Alice');
@@ -71,7 +72,7 @@ contract('Collectables', function(accounts) {
             assert.equal(e.message, expected, 'Extected error message match: ' + expected);
         }
         const count = await collectables.getNumberOfCollectionsForCategory(category);
-        assert.equal(count, 1, 'Should still be 1 collection for category');
+        assert.equal(count, 2, 'Should still be 2 collections for category');
     });
 
     const vegemiteHash = "0x7d5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
@@ -80,14 +81,14 @@ contract('Collectables', function(accounts) {
         const collectables = await Collectables.deployed();
         const itemName = "Vegemite";
         const value = web3.toWei(100, "finney");
-        await collectables.addItem(category, 0, itemName, vegemiteHash, value, true, {from: alice});
+        await collectables.addItem(category, 1, itemName, vegemiteHash, value, true, {from: alice});
 
-        const item = await collectables.getItem(category, 0, itemName);
+        const item = await collectables.getItem(category, 1, itemName);
         assert.equal(item[0].toString(16), vegemiteHash, 'Item ipfsHash should match');
         assert.equal(item[1].toString(10), value, 'Item value should match');
         assert.equal(item[2].toString(), 'true', 'Item swappable should be true');
         
-        const collection = await collectables.getCollectionDetailsByIndex(category, 0);
+        const collection = await collectables.getCollectionDetailsByIndex(category, 1);
         assert.equal(collection[3].toString(10), 1, 'Collection item count should be 1');  
 
     });
@@ -98,13 +99,13 @@ contract('Collectables', function(accounts) {
         const ipfsHash = "0xff5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
         const value = web3.toWei(1, "finney");
         try {
-            await collectables.addItem(category, 0, itemName, ipfsHash, value, true, {from: bob});
+            await collectables.addItem(category, 1, itemName, ipfsHash, value, true, {from: bob});
         } catch (e) {
             const expected = "VM Exception while processing transaction: revert";
             assert.equal(e.message, expected, 'Extected error message match: ' + expected);
         }
       
-        const collection = await collectables.getCollectionDetailsByIndex(category, 0);
+        const collection = await collectables.getCollectionDetailsByIndex(category, 1);
         assert.equal(collection[3].toString(10), 1, 'Collection item count should still be 1');  
 
     });
@@ -115,16 +116,16 @@ contract('Collectables', function(accounts) {
         const ipfsHash = "0x6e5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
         const value = web3.toWei(10, "finney");
         // add it first and make sure its there
-        await collectables.addItem(category, 0, itemName, ipfsHash, value, true, {from: alice});
-        const item = await collectables.getItem(category, 0, itemName);
+        await collectables.addItem(category, 1, itemName, ipfsHash, value, true, {from: alice});
+        const item = await collectables.getItem(category, 1, itemName);
         assert.equal(item[0].toString(16), ipfsHash, 'Item ipfsHash should match');
         
-        const collection = await collectables.getCollectionDetailsByIndex(category, 0);
+        const collection = await collectables.getCollectionDetailsByIndex(category, 1);
         assert.equal(collection[3].toString(10), 2, 'Collection item count should be 2');  
 
         // now try to remove it
-        await collectables.removeItem(category, 0, itemName, {from: alice});
-        const collAfter = await collectables.getCollectionDetailsByIndex(category, 0);
+        await collectables.removeItem(category, 1, itemName, {from: alice});
+        const collAfter = await collectables.getCollectionDetailsByIndex(category, 1);
         assert.equal(collAfter[3].toString(10), 1, 'Collection item count should be back to 1');  
 
     });
@@ -144,10 +145,10 @@ contract('Collectables', function(accounts) {
         const itemName = "Eggs";
         const ipfsHash = "0x4b5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
         const value = web3.toWei(100, "finney");
-        await collectables.addItem(category, 1, itemName, ipfsHash, value, true, {from: bob});
+        await collectables.addItem(category, 2, itemName, ipfsHash, value, true, {from: bob});
         console.log("added item for Bobs collection");
         // now propose swap, for ipfs address just reuse item hash for test
-        const index = [1, 0];
+        const index = [2, 1];
         const itemNameFor = "Vegemite";
         var bobBalanceBefore = await web3.eth.getBalance(bob).toNumber();
         console.log("Bobs balance before: " + bobBalanceBefore);
@@ -165,11 +166,11 @@ contract('Collectables', function(accounts) {
         var bobBalanceAfter = await web3.eth.getBalance(bob).toNumber();
         console.log("Bobs balance after: " + bobBalanceAfter);
         // see if alice got it
-        const swap = await collectables.getProposedSwap(category, 0, 0, {from: alice});
+        const swap = await collectables.getProposedSwap(category, 1, 0, {from: alice});
         console.log("Checked if alice got it");
      
         // get bob sent proposals too
-        const sent = await collectables.isProposalSent(category, 1, ipfsHash, {from: bob});
+        const sent = await collectables.isProposalSent(category, 2, ipfsHash, {from: bob});
         console.log("Checked if bob got it");
 
         assert.equal(sent.toString(), 'true', 'swap proposal item should be marked as sent');
@@ -189,10 +190,10 @@ contract('Collectables', function(accounts) {
     it("should allow a collector to reject swap propsal", async() => {
         const collectables = await Collectables.deployed();
 
-        await collectables.rejectSwap(category, 0, 0, {from: alice});
+        await collectables.rejectSwap(category, 1, 0, {from: alice});
         try {
             console.log("Swap rejected, now checking that deleted");
-            const swap = await collectables.getProposedSwap(category, 0, 0, {from: alice});
+            const swap = await collectables.getProposedSwap(category, 1, 0, {from: alice});
         } catch (e) {
             const expected = "VM Exception while processing transaction: revert";
             assert.equal(e.message, expected, 'Extected error message match: ' + expected);
@@ -201,7 +202,7 @@ contract('Collectables', function(accounts) {
         // now check bobs sent list is false
         console.log("now checking bob knows");
         const ipfsHash = "0x4b5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";       
-        const sent = await collectables.isProposalSent(category, 1, ipfsHash, {from: bob});
+        const sent = await collectables.isProposalSent(category, 2, ipfsHash, {from: bob});
         assert.equal(sent.toString(), 'false', 'swap proposal item should be marked as not sent');
 
         // now check bob has redeemable escrow
@@ -215,7 +216,7 @@ contract('Collectables', function(accounts) {
         const collectables = await Collectables.deployed();
 
         // bob will have to propose swap again
-        const index = [1, 0];
+        const index = [2, 1];
         const itemName = "Eggs";
         const itemNameFor = "Vegemite";
         const ipfsSwapWithHash = "0x4b5a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
@@ -225,7 +226,7 @@ contract('Collectables', function(accounts) {
         console.log("proposed swap");
 
         // now let alice check she got it
-        const swap = await collectables.getProposedSwap(category, 0, 0, {from: alice});
+        const swap = await collectables.getProposedSwap(category, 1, 0, {from: alice});
         console.log("alice got swap");
         assert.equal(swap[0], bob, 'Proposed swapper should be bob');
         assert.equal(swap[1].toString(16), ipfsBobsAddrHash, 'postal address of swapper should match hash');
@@ -251,7 +252,7 @@ contract('Collectables', function(accounts) {
             eventEmitted = true;
         });
  
-        await collectables.confirmSwap(category, 0, 0, ipfsAliceAddrHash, {from: alice, value: value});
+        await collectables.confirmSwap(category, 1, 0, ipfsAliceAddrHash, {from: alice, value: value});
 
         var aliceBalanceAfter = await web3.eth.getBalance(alice).toNumber();
         console.log("Alice's balance after: " + aliceBalanceAfter);
@@ -272,7 +273,7 @@ contract('Collectables', function(accounts) {
         const ipfsAliceAddrHash = "0x665a99f603f231d53a4f39d1521f98d2e8bb279cf29bebfd0687dc98458e7f89";
         const value = web3.toWei(100, "finney");
  
-        const swap = await collectables.getConfirmedSwapDetails(category, 0, 0, {from: alice}); 
+        const swap = await collectables.getConfirmedSwapDetails(category, 1, 0, {from: alice}); 
         //cs.proposal.swapper, cs.proposal.swapperAddr, cs.proposal.swapFor.ipfsHash, cs.proposal.swapWith.ipfsHash,
         //cs.proposal.swapWith.value, cs.swappeeAddr, uint8(cs.status)
         assert.equal(swap[0], bob, 'Proposed swapper should be bob');
@@ -294,10 +295,10 @@ contract('Collectables', function(accounts) {
         console.log("Swap Count is: " + swapCount);
         console.log("Ref in hex is is: " + swapRefArg);
 
-        await collectables.addTrackingReference(category, 0, swapRefArg, 0, {from: alice});
+        await collectables.addTrackingReference(category, 1, swapRefArg, 0, {from: alice});
         console.log("added reference now try to retireve using other collector");
 
-        const track = await collectables.getConfirmedSwapTrackingDetails(category, 1, 0, {from: bob});
+        const track = await collectables.getConfirmedSwapTrackingDetails(category, 2, 0, {from: bob});
         //cs.swapperTrack.received, cs.swapperTrack.reference, cs.swappeeTrack.received, cs.swappeeTrack.reference
         assert.isFalse(track[0], "Swapper has not received item yet");
         assert.equal(web3.toAscii(track[1]).replace(/\u0000/g, ''), "", "Swapper Reference should be empty");
@@ -312,13 +313,13 @@ contract('Collectables', function(accounts) {
         const swapperReference = "B12345";
         const swappeeReference = "A12345";
 
-        await collectables.addTrackingReference(category, 1, web3.fromAscii(swapperReference), 0, {from: bob});
+        await collectables.addTrackingReference(category, 2, web3.fromAscii(swapperReference), 0, {from: bob});
         console.log("added reference now mark received");
 
-        await collectables.markItemReceived(category, 1, 0, {from: bob});
+        await collectables.markItemReceived(category, 2, 0, {from: bob});
         console.log("bob mark received");
 
-        const track = await collectables.getConfirmedSwapTrackingDetails(category, 0, 0, {from: alice});
+        const track = await collectables.getConfirmedSwapTrackingDetails(category, 1, 0, {from: alice});
         console.log(track);
         assert.isTrue(track[0], "Swapper has received item");
         assert.equal(web3.toAscii(track[1]).replace(/\u0000/g, ''), swapperReference, "Swapper Reference should match");
@@ -326,13 +327,13 @@ contract('Collectables', function(accounts) {
         assert.equal(web3.toAscii(track[3]).replace(/\u0000/g, ''), swappeeReference, "Swappee Reference should match");
         
         //alice receives item and status changes
-        await collectables.markItemReceived(category, 0, 0, {from: alice});
+        await collectables.markItemReceived(category, 1, 0, {from: alice});
         console.log("alice mark received");
       
-        const bobTrack = await collectables.getConfirmedSwapTrackingDetails(category, 1, 0, {from: bob});
+        const bobTrack = await collectables.getConfirmedSwapTrackingDetails(category, 2, 0, {from: bob});
         console.log(bobTrack);  
         assert.isFalse(bobTrack[0], "Once swap completed track should be deleted");
-        const swap = await collectables.getConfirmedSwapDetails(category, 0, 0, {from: alice}); 
+        const swap = await collectables.getConfirmedSwapDetails(category, 1, 0, {from: alice}); 
         assert.equal(swap[6].toNumber(10), 3, "Status should be Completed");
      
     });

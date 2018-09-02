@@ -32,7 +32,7 @@ export class CollectionStorage {
   dataChange = new BehaviorSubject<CollectionNode[]>([]);
   Collectables: any;
   CategoryNodes: CollectionNode[];
-  accounts: string[];
+ // accounts: string[];
  
     get data(): CollectionNode[] { return this.dataChange.value; }
 
@@ -45,7 +45,7 @@ export class CollectionStorage {
       console.log('OnInit: ' + this.web3Service);
       console.log(this);
       // TODO currently no observable events when adding categories or collections so implement some sort of watch when their is
-      this.watchAccount();
+      //this.watchAccount();
       this.web3Service.artifactsToContract(collect_artifacts)
         .then((CollectAbstraction) => {
           this.Collectables = CollectAbstraction;
@@ -53,7 +53,7 @@ export class CollectionStorage {
         });
     
       // Build the tree nodes from Ethereum. The result is a list of `CollectionNode` with nested collection node as children.
-      await this.delay(1300); // after accounts are refreshed, will reduce this later
+      await this.delay(200); // prob dont need anymore but keep just in case
       /*if(isDevMode()) {
         console.log("In dev mode so bootstrapping data into contract");
         this.bootstrap();
@@ -62,6 +62,7 @@ export class CollectionStorage {
       this.getCategories();
       await this.delay(300);
       this.getCollections();
+      await this.delay(300);
 
       // Notify the change.
       this.dataChange.next(this.CategoryNodes);
@@ -71,16 +72,16 @@ export class CollectionStorage {
       return new Promise( resolve => setTimeout(resolve, ms) );
     }
 
-    watchAccount() {
+    /*watchAccount() {
       this.web3Service.accountsObservable.subscribe((accounts) => {
         this.accounts = accounts;
       });
-    }
+    }*/
 
     // temporary bootstrap function for dev
     // TODO come up with a better way to boostrap via script
-    async bootstrap() {
-      const owner = this.accounts[0];
+    //async bootstrap() {
+      /*const owner = this.accounts[0];
       const alice = this.accounts[1];
       const bob = this.accounts[2];
 
@@ -92,7 +93,7 @@ export class CollectionStorage {
         await collectables.addCategory(category, {from: owner});
       } catch (e) {
         console.log("Probably duplicate category: " + e.message.toString());
-      }   
+      } */  
 
       /*try {
         const name = "Alice";
@@ -121,7 +122,7 @@ export class CollectionStorage {
       } catch (e) {
         console.log("Add collection for Bob failed with: " + e.message);
       }  */    
-    }
+    //}
 
     async getCategories() {
       if (!this.Collectables) {
@@ -167,9 +168,11 @@ export class CollectionStorage {
             const node = new CollectionNode();
             node.name = collection[0];
             node.type = 'Collection';
-            this.CategoryNodes[catIndex].children.push(node);
+            let len = this.CategoryNodes[catIndex].children.push(node);
+            console.log("len: " + len.toString());           
+            console.log("added cat node: " + this.CategoryNodes[catIndex].children[len-1].name);
           }
-        }
+       }
        
       } catch (e) {
         console.log(e);
@@ -209,6 +212,7 @@ export class CollectBrowserComponent implements OnInit {
   }
 
   transformer = (node: CollectionNode, level: number) => {
+    console.log("transformer called for node: " + node.name);
     return new CollectionFlatNode(!!node.children, node.name, level, node.type);
   }
 

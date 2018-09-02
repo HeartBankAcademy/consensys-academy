@@ -96,7 +96,14 @@ contract Collectables is Ownable {
     modifier onlyCollectionOwner(string category, uint index) {
         require(categoryCollectionsMap[category][index].collector == msg.sender, "must own collection");
         _;
-    } 
+    }
+
+    constructor () public {
+        string memory cat = "Coles Little Shop";
+        addCategory(cat);
+        addCollector("Owner");
+        addCollection("Owners Collection", "#Collectables", cat);
+    }
 
     // Allows contract owner to stop contract if major bug found
     function stopContract() external onlyOwner {
@@ -107,7 +114,7 @@ contract Collectables is Ownable {
     * @dev Allows the current owner to add a Category
     * @param _category New category string, maximum length 30 to allow fit into 1 storage slot
     */
-    function addCategory(string _category) external onlyOwner {
+    function addCategory(string _category) public onlyOwner {
         require(bytes(_category).length > 0 && bytes(_category).length < 31, "category must be populated and max len 30");
         require(!categoryNameExists[_category], "Category Name must be unique");
         categories.push(_category);
@@ -136,7 +143,7 @@ contract Collectables is Ownable {
     * @dev Allows the msg sender to register as a collector
     * @param _name name of collector
     */
-    function addCollector(string _name) external {
+    function addCollector(string _name) public {
         if(isCollector(msg.sender)) revert("Collector exists");
         require(bytes(_name).length > 0, "Name argument must be populated");
         collectors[msg.sender].name = _name;
@@ -156,7 +163,7 @@ contract Collectables is Ownable {
     * @param _tags useful tags to search for collection
     * @param _category category that the collection will be added to
     */
-    function addCollection(string _name, string _tags, string _category) external onlyCollector {
+    function addCollection(string _name, string _tags, string _category) public onlyCollector {
         require(bytes(_name).length > 0, "Name argument must be populated");
         require(bytes(_tags).length > 0, "Tags argument must be populated");
         require(categoryNameExists[_category], "Invalid Category Name");

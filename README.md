@@ -4,11 +4,10 @@
 ### Current State
 #### Angular 6 frontend
 Very early alpha 
-Only implemented User browses Categories story (and only categories and collections so far)
-- not working (need to get bootstrap function working - cant add collections to category)
-- app does connect to contract and can recognise accounts
-- add category using owner has been implemented successfully and can retrieve category name from contract
-- gets category count from contract successfully
+Only implemented 
+- Display current account (and name)
+- User browses Categories story (and only categories and collections so far)
+- app does connect to contract and can call contract functions successfully
 
 Going to switch to geth for further dev and testing (both truffle and dApp)
 
