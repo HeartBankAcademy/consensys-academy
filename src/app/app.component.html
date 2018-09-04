@@ -1,7 +1,19 @@
-<mat-toolbar color="primary">Collectables - Current Account: {{currentAccount}} {{accountName}}</mat-toolbar>
+<mat-toolbar color="primary">Collectables - Current Account: {{currentAccount}}
+    <div *ngIf="isCollector">{{accountName}} is a registered Collector</div>
+</mat-toolbar>
 <!--TODO insert components here -->
+<div *ngIf="!isCollector" class="form-container">
+    <mat-form-field hintLabel="Max 30 characters">
+        <input matInput #input maxlength="30" placeholder="Enter Name">
+        <mat-hint align="end">{{input.value?.length || 0}}/30</mat-hint>
+    </mat-form-field>
+    <button mat-raised-button (click)="register(input.value)">Register as Collector</button>
+</div>
+    
 <div class="mat-app-background basic-container">
     <app-collect-browser></app-collect-browser>
 </div>
+
+<div *ngIf="isCollector">Collector Home</div>
 
 <!--app-meta-sender></app-meta-sender-->

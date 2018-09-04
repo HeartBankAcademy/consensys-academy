@@ -4,8 +4,11 @@
 ### Current State
 #### Angular 6 frontend
 Very early alpha 
+
 Only implemented 
-- Display current account (and name)
+- Display current account
+- Recognise if user is registered and displays name
+- Register Collector story
 - User browses Categories story (and only categories and collections so far)
 - app does connect to contract and can call contract functions successfully
 

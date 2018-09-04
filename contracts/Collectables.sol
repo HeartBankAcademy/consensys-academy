@@ -145,7 +145,7 @@ contract Collectables is Ownable {
     */
     function addCollector(string _name) public {
         if(isCollector(msg.sender)) revert("Collector exists");
-        require(bytes(_name).length > 0, "Name argument must be populated");
+        require(bytes(_name).length > 0 && bytes(_name).length < 31, "Name argument must be populated and max len 30");
         collectors[msg.sender].name = _name;
     }
 
