@@ -3,13 +3,14 @@ import * as contract from 'truffle-contract';
 import {Subject} from 'rxjs/Rx';
 declare let require: any;
 const Web3 = require('web3');
-
+const IPFS = require('ipfs-api');
 
 declare let window: any;
 
 @Injectable()
 export class Web3Service {
   private web3: any;
+  private ipfs: any;
   private accounts: string[];
   public ready = false;
   public Collectables: any;
@@ -18,6 +19,7 @@ export class Web3Service {
   constructor() {
     window.addEventListener('load', (event) => {
       this.bootstrapWeb3();
+      this.bootstrapIPFS();
     });
   }
 
@@ -36,6 +38,10 @@ export class Web3Service {
     }
 
     setInterval(() => this.refreshAccounts(), 1000);
+  }
+
+  public bootstrapIPFS() {
+    this.ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
   }
 
   public async artifactsToContract(artifacts) {

@@ -4,6 +4,7 @@ import { tryCatch } from '../../node_modules/rxjs/internal/util/tryCatch';
 
 declare let require: any;
 const collect_artifacts = require('../../build/contracts/Collectables.json');
+const Web3 = require('web3');
 
 @Component({
   selector: 'app-root',
@@ -40,6 +41,27 @@ export class AppComponent implements OnInit {
     });
   }
 
+  async watchRegistration() {
+    if (!this.Collectables) {
+      console.log('Collectables is not loaded, unable to watch event');
+      return;
+    }
+    console.log('Waiting for Rego event');
+    const collectables = await this.Collectables.deployed();
+    var event = collectables.RegistrationConfirmed();
+    //var registeredAddr;
+    await event.watch((err, res) => {
+      console.log('Rego event received ' + res.args.sender);
+      console.log('Current account ' + this.currentAccount);
+      //registeredAddr = res.args.sender;
+      if(res.args.sender === Web3.utils.toHex(this.currentAccount) {
+        console.log('address match');
+        this.getIsCollector();
+        this.getAccountName();
+      }
+    });    
+  }
+
   async getAccountName() {
     if (!this.Collectables) {
       console.log('Collectables is not loaded, unable to send transaction');
@@ -72,14 +94,16 @@ export class AppComponent implements OnInit {
   }
 
   async register(name: string) {
-    console.log('Register called: ' + name); 
+    console.log('Register function called: ' + name); 
     if (!this.Collectables) {
       console.log('Collectables is not loaded, unable to send transaction');
       return;
     } 
     try {
       const collectables = await this.Collectables.deployed();
+      this.watchRegistration();
       await collectables.addCollector(name, {from: this.accounts[0]});
+      console.log('Register called: ' + name);
     } catch (e) {
       console.log("AddCollector failed with: " + e.message.toString());     
     }  

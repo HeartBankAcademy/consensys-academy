@@ -27,6 +27,7 @@
     "@angular/router": "6.1.1",
     "core-js": "^2.5.4",
     "hammerjs": "^2.0.8",
+    "ipfs-api": "^24.0.1",
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.2.2",
     "web3": "1.0.0-beta.34",

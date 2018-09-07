@@ -14,6 +14,19 @@ Only implemented
 
 Going to switch to geth for further dev and testing (both truffle and dApp)
 
+#### TODO
+for add collection and add item stories
+
+import image file and send to IPFS infura
+
+ipfs already added to web3 service
+
+https://medium.freecodecamp.org/hands-on-get-started-with-infura-and-ipfs-on-ethereum-b63635142af0
+
+https://github.com/ackerapple/angular-file
+
+https://ackerapple.github.io/angular-file/
+
 #### Solidity backend
 First Candidate beta version - all functionality implemented for user stories apart from disputes
 - all 15 tests working, doxygen tags done, design decisions documented, avoiding attacks documented

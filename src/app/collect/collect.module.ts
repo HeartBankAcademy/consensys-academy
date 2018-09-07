@@ -17,6 +17,7 @@ import {
   MatTreeModule,
 } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { CollectHomeComponent } from './collect-home/collect-home.component';
 
 @NgModule({
   imports: [
@@ -35,8 +36,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     RouterModule,
     UtilModule
   ],
-  declarations: [CollectBrowserComponent],
-  exports: [CollectBrowserComponent]
+  declarations: [CollectBrowserComponent, CollectHomeComponent],
+  exports: [CollectBrowserComponent, CollectHomeComponent]
 })
 export class CollectModule {
 }

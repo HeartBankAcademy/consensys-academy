@@ -3,7 +3,8 @@ import Web3 from 'web3';
 
 import {Web3Service} from './web3.service';
 
-import metacoin_artifacts from '../../../build/contracts/MetaCoin.json';
+import collect_artifacts from '../../../build/contracts/Collectables.json';
+
 
 declare let window: any;
 
@@ -21,7 +22,7 @@ describe('Web3Service', () => {
   it('should inject a default web3 on a contract', inject([Web3Service], (service: Web3Service) => {
     service.bootstrapWeb3();
 
-    return service.artifactsToContract(metacoin_artifacts).then((abstraction) => {
+    return service.artifactsToContract(collect_artifacts).then((abstraction) => {
       expect(abstraction.currentProvider.host).toBe('http://localhost:8545');
     });
   }));
@@ -33,7 +34,7 @@ describe('Web3Service', () => {
 
     service.bootstrapWeb3();
 
-    return service.artifactsToContract(metacoin_artifacts).then((abstraction) => {
+    return service.artifactsToContract(collect_artifacts).then((abstraction) => {
       expect(abstraction.currentProvider.host).toBe('http://localhost:1337');
     });
   }));

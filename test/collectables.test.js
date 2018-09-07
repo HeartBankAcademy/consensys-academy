@@ -35,11 +35,21 @@ contract('Collectables', function(accounts) {
         const collectables = await Collectables.deployed();
         const name = "Alice";
 
+        var eventEmitted = false;
+        var event = collectables.RegistrationConfirmed();
+        var sender;
+        await event.watch((err, res) => {
+            sender = res.args.sender;
+            eventEmitted = true;
+        });
+
         await collectables.addCollector(name, {from: alice});
         
         const collector = await collectables.collectors(alice);
         // collector struct is returned as an array of elements in struct
         assert.equal(collector[0], name, 'Name should match');
+        assert.equal(eventEmitted, true, 'should emit a RegistrationConfirmed event');
+        assert.equal(sender, alice, "Event sender should be alice");
     });
 
     it("should allow a Collector to add a Collection", async() => {
@@ -58,7 +68,12 @@ contract('Collectables', function(accounts) {
         assert.equal(collection[0], name, 'Collection name should match');
         assert.equal(collection[1], alice, 'Collection owner should be Alice');
         assert.equal(collection[2], tags, 'Collection tags should match');  
-        assert.equal(collection[3].toString(10), 0, 'Collection item count should be 0');  
+        assert.equal(collection[3].toString(10), 0, 'Collection item count should be 0'); 
+        
+        const has = await collectables.hasCollectionInCategory(category, {from: alice});
+        assert.equal(has[0], true, 'Has collection should be true');
+        assert.equal(has[1].toString(10), "1", 'Index should be 1');
+        assert.equal(has[2], name, 'Collection name should match');
     });
 
     it("should not allow a non collector to add a collection", async() => {

@@ -6,6 +6,7 @@ contract Collectables is Ownable {
 
     event ProposalSent(uint index, address sender, address receiver);
     event ConfirmationSent(uint index, address sender, address receiver);
+    event RegistrationConfirmed(address sender);
 
     struct Collection {
         address collector;
@@ -145,8 +146,10 @@ contract Collectables is Ownable {
     */
     function addCollector(string _name) public {
         if(isCollector(msg.sender)) revert("Collector exists");
-        require(bytes(_name).length > 0 && bytes(_name).length < 31, "Name argument must be populated and max len 30");
+        uint len = bytes(_name).length;
+        require(len > 0 && len < 31, "Name argument must be populated and max len 30");
         collectors[msg.sender].name = _name;
+        emit RegistrationConfirmed(msg.sender);
     }
 
    /**
@@ -180,6 +183,22 @@ contract Collectables is Ownable {
     */
     function getNumberOfCollectionsForCategory(string _category) external view returns (uint num) {
         return categoryCollectionsMap[_category].length;
+    }
+
+    /**
+     * @dev Allows a Collector to check if they have a Collection in given category
+     * @param _category category name
+     * @return has (true if has collection for that category)
+     * @return index (index in collection)
+     * @return name (collection name)
+     */
+    function hasCollectionInCategory(string _category) external view onlyCollector returns (bool has, uint index, string name) {
+        index = collectors[msg.sender].myCollections[_category];
+        // if index is 0 we need to double check
+        if(index == 0 && categoryCollectionsMap[_category][index].collector != msg.sender) {
+            return (false, 0, "");
+        } 
+        return (true, index, categoryCollectionsMap[_category][index].name);
     }
 
     /**
