@@ -49,12 +49,10 @@ export class AppComponent implements OnInit {
     console.log('Waiting for Rego event');
     const collectables = await this.Collectables.deployed();
     var event = collectables.RegistrationConfirmed();
-    //var registeredAddr;
     await event.watch((err, res) => {
-      console.log('Rego event received ' + res.args.sender);
-      console.log('Current account ' + this.currentAccount);
-      //registeredAddr = res.args.sender;
-      if(res.args.sender === Web3.utils.toHex(this.currentAccount) {
+      //console.log('Rego event received ' + res.args.sender);
+      //console.log('Current account ' + this.currentAccount);
+      if(res.args.sender === Web3.utils.toHex(this.currentAccount)) {
         console.log('address match');
         this.getIsCollector();
         this.getAccountName();

@@ -32,7 +32,6 @@ export class CollectionStorage {
   dataChange = new BehaviorSubject<CollectionNode[]>([]);
   Collectables: any;
   CategoryNodes: CollectionNode[];
- // accounts: string[];
  
     get data(): CollectionNode[] { return this.dataChange.value; }
 
@@ -72,14 +71,7 @@ export class CollectionStorage {
       return new Promise( resolve => setTimeout(resolve, ms) );
     }
 
-    /*watchAccount() {
-      this.web3Service.accountsObservable.subscribe((accounts) => {
-        this.accounts = accounts;
-      });
-    }*/
-
     // temporary bootstrap function for dev
-    // TODO come up with a better way to boostrap via script
     //async bootstrap() {
       /*const owner = this.accounts[0];
       const alice = this.accounts[1];
